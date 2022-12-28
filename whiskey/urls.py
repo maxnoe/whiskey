@@ -17,8 +17,10 @@ from django.contrib import admin
 from django.urls import path
 
 from .app.views import AppView
+from .api.views import BottlesApi
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", AppView.as_view(), name="app"),
+    path("api/greet", BottlesApi.as_view()),
 ]

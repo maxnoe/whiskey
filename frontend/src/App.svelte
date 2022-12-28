@@ -1,30 +1,63 @@
 <script>
-	export let name;
+    import { onMount } from "svelte";
+
+    let bottles = {
+        whiskeys: [],
+        rums: [],
+        other: [],
+    }
+
+    onMount(async () => {
+        let resp = await fetch("/api/greet").then((res) => res.json());
+        bottles.whiskeys = []
+        bottles.rums = []
+        bottles.other = []
+
+        resp["bottles"].forEach(bottle => {
+            console.log(bottle)
+            if (bottle.kind == "whiskey") {
+                bottles.whiskeys.push(bottle)
+            } else if (bottle.kind == "rum") {
+                bottles.rums.push(bottle)
+            } else {
+                bottles.other.push(bottle)
+            }
+        });
+
+    })
 </script>
 
 <main>
-	<h1>Hello {name}!</h1>
-	<p>Visit the <a href="https://svelte.dev/tutorial">Svelte tutorial</a> to learn how to build Svelte apps.</p>
+	<h1>Bottles</h1>
+
+    {#if bottles.whiskeys.length > 0}
+    <h2>Whiskeys</h2>
+    <ul>
+    {#each bottles.whiskeys as bottle}
+        <li> {bottle.name} </li>
+    {/each}
+    </ul>
+    {/if}
+
+    {#if bottles.rums.length > 0}
+    <h2>Rums</h2>
+    <ul>
+    {#each bottles.rums as bottle}
+        <li> {bottle.name} </li>
+    {/each}
+    </ul>
+    {/if}
+
+    {#if bottles.other.length > 0}
+    <h2>Other</h2>
+    <ul>
+    {#each bottles.other as bottle}
+        <li> {bottle.name} </li>
+    {/each}
+    </ul>
+    {/if}
+
 </main>
 
 <style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
-
-	@media (min-width: 640px) {
-		main {
-			max-width: none;
-		}
-	}
 </style>
