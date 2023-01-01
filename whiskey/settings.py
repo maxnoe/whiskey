@@ -35,7 +35,10 @@ DEBUG = envbool("WHISKEY_DEBUG", False)
 DEVICE = os.getenv("WHISKEY_DEVICE", "/dev/ttyACM0")
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "maxnoe-x1.local",
+    "localhost",
+]
 
 
 # Application definition
