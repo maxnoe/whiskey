@@ -30,8 +30,10 @@ def envbool(name, default=False):
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("WHISKEY_SECRET", "django-insecure-4x5z^3tlml!wymrt%e$&li0x0y50g!km&dvn_6f@x!b5f19gaa")
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = envbool("WHISKEY_DEBUG", False)
+
+DEVICE = os.getenv("WHISKEY_DEVICE", "/dev/ttyACM0")
+
 
 ALLOWED_HOSTS = []
 

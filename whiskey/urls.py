@@ -17,10 +17,10 @@ from django.contrib import admin
 from django.urls import path
 
 from .app.views import AppView
-from .api.views import BottlesApi
+from .api.views import PixelsAPI
 
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("", AppView.as_view(), name="app"),
-    path("api/greet", BottlesApi.as_view()),
+    path("api/pixels", PixelsAPI.as_view()),
 ]
