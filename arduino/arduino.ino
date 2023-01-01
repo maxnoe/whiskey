@@ -18,9 +18,6 @@ const auto RED = pixels.Color(64, 0, 0);
 const auto GREEN = pixels.Color(0, 64, 0);
 const auto BLUE = pixels.Color(0, 0, 64);
 
-
-StaticJsonDocument<512> json;
-
 uint32_t colors[N_PIXELS];
 
 bool on = true;
@@ -52,7 +49,6 @@ void setup() {
     colors[pixel] = RED;
   }
 
-  /* all_off(); */
   set_color();
 
   Serial.begin(115200);
@@ -73,21 +69,29 @@ struct RGB {
 
 
 void serialEvent() {
-  auto err = deserializeJson(json, Serial);
+  /* DynamicJsonDocument doc(1024); */
+  StaticJsonDocument<1024> doc;
+  auto err = deserializeJson(doc, Serial);
+
   if (err != DeserializationError::Ok) {
-    Serial.print("Error decoding json: ");
-    Serial.println(err.c_str());
+    Serial.print(F("Error decoding doc: "));
+    Serial.println(err.f_str());
+    delay(10);
+    while (Serial.available() > 0) {
+      Serial.read();
+      delay(10);
+    }
     return;
   }
 
-  JsonObject obj = json.as<JsonObject>();
+  JsonObject obj = doc.as<JsonObject>();
   if (!obj) {
-    Serial.println("Json command must be an object");
+    Serial.println(F("command must be an object"));
     return;
   }
 
   if (!obj["cmd"].is<String>()) {
-    Serial.println("Json command must have key 'cmd' with string value");
+    Serial.println(F("command must have key 'cmd' with string value"));
     return;
   }
 
@@ -99,52 +103,77 @@ void serialEvent() {
   } else if (cmd == "off") {
     on = false;
     all_off();
-  } else if (cmd == "set") {
+  } else if (cmd == "set_pix") {
     if (!obj["pix"].is<int>()) {
-      Serial.println("Json set cmd must have key 'pix' with int value");
+      Serial.println("set_pix cmd must have key 'pix' with int value");
       return;
     }
     int pix = obj["pix"];
     if (pix < 0 || pix >= N_PIXELS) {
-      Serial.println("Invalid pix index");
+      Serial.println(F("Invalid pix index"));
       return;
     }
 
     JsonArray color = obj["color"];
     if (!color || color.size() != 3) {
-      Serial.println("Json set cmd must have key 'color' as array of 3 RGB values");
+      Serial.println(F("set_pix cmd must have key 'color' as array of 3 RGB values"));
       return;
     }
 
-    const uint8_t r = color[0];
-    const uint8_t g = color[1];
-    const uint8_t b = color[2];
-    colors[pix] = pixels.Color(r, g, b);
+    colors[pix] = pixels.Color(color[0], color[1], color[2]);
     pixels.setPixelColor(pix, colors[pix]);
     pixels.show();
+
+  } else if (cmd == "set") {
+    JsonArray new_colors = obj["colors"];
+
+    if (!new_colors || new_colors.size() != N_PIXELS) {
+      Serial.println(F("set cmd must have key 'colors' with RGB values for each pixel"));
+      return;
+    }
+
+    for (int pix=0; pix < N_PIXELS; pix++) {
+      JsonArray color = new_colors[pix];
+      if (!color || color.size() != 3) {
+        Serial.print(F("Pixel color must be 3 RGB values, got"));
+        Serial.println(color.size());
+        return;
+      }
+
+      colors[pix] = pixels.Color(color[0], color[1], color[2]);
+      pixels.setPixelColor(pix, colors[pix]);
+    }
+    pixels.show();
+
   } else if (cmd == "get") {
-    json.clear();
-    json["on"] = on;
+    doc.to<JsonObject>();
+    doc["on"] = on;
     for (int pix=0; pix < N_PIXELS; pix++) {
         RGB rgb(colors[pix]);
-        json["colors"][pix][0] = rgb.r;
-        json["colors"][pix][1] = rgb.g;
-        json["colors"][pix][2] = rgb.b;
+        doc["colors"][pix][0] = rgb.r;
+        doc["colors"][pix][1] = rgb.g;
+        doc["colors"][pix][2] = rgb.b;
     }
-    serializeJson(json, Serial);
+
+    if (doc.overflowed()) {
+      Serial.println(F("Overflow!!!"));
+      return;
+    }
+    serializeJson(doc, Serial);
     Serial.println();
     return;
   } else {
-    Serial.print("Unknown command: ");
+    Serial.print(F("Unknown command: "));
     Serial.println(cmd);
     return;
   }
 
-  Serial.print("ok: ");
+  Serial.print(F("ok: "));
   Serial.println(cmd);
 }
 
 
 void loop() {
+  if (on) set_color();
   delay(10);
 }

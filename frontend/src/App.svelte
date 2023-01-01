@@ -28,7 +28,7 @@ function hex2rgb(hex) {
 }
 
 function setColor(event) {
-    const cmd = {"cmd": "set", "pix": pixel, "color": hex2rgb(color)};
+    const cmd = {"cmd": "set_pix", "pix": pixel, "color": hex2rgb(color)};
     sendCommand(cmd).then(data => console.log(data));
 }
 

@@ -16,6 +16,7 @@ pyserial = "^3.5"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.7.0"
+msgpack = "^1.0.4"
 
 [build-system]
 requires = ["poetry-core"]
