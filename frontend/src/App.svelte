@@ -8,17 +8,13 @@ async function sendCommand(cmd) {
         },
         body: JSON.stringify(cmd)
     })
-    return response
+    return await response.json()
 }
 
 
 function toggle(event) {
-    let cmd = "off"
-    if (event.target.checked) {
-        cmd = "on"
-    }
-    let data = {"cmd": cmd};
-    sendCommand(data).then(response => {console.log(response.json());});
+    let cmd = {"cmd": event.target.checked ? "on" : "off"};
+    sendCommand(cmd).then(data => console.log(data));
 }
 
 let color = "#400000";
@@ -32,8 +28,8 @@ function hex2rgb(hex) {
 }
 
 function setColor(event) {
-    const cmd = {"cmd": "set", "pix": pixel, "color": hex2rgb(color)}
-    sendCommand(cmd).then(response => {console.log(response.json());});
+    const cmd = {"cmd": "set", "pix": pixel, "color": hex2rgb(color)};
+    sendCommand(cmd).then(data => console.log(data));
 }
 
 </script>

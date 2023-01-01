@@ -16,8 +16,15 @@ def send_command(cmd):
     data = json.dumps(cmd, separators=(',', ':')).encode("ascii")
     PIXELS.write(data)
     response = PIXELS.readline().decode('ascii')
+
+    if cmd["cmd"] == "get":
+        data = {"status": "ok"}
+        data.update(json.loads(response))
+        return data
+
     if not response.startswith("ok"):
         return {"status": "error", "msg": response}
+
     return {"status": "ok"}
 
 
@@ -26,3 +33,6 @@ class PixelsAPI(APIView):
 
     def post(self, request, format=None):
         return Response(send_command(request.data))
+
+    def get(self, request, format=None):
+        return Response(send_command({"cmd": "get"}))

@@ -19,12 +19,11 @@ const auto GREEN = pixels.Color(0, 64, 0);
 const auto BLUE = pixels.Color(0, 0, 64);
 
 
-StaticJsonDocument<512> json_cmd;
+StaticJsonDocument<512> json;
 
 uint32_t colors[N_PIXELS];
 
-bool new_cmd = false;
-bool on = false;
+bool on = true;
 
 uint32_t white(float intensity) {
     auto value = static_cast<uint8_t>(255 * intensity);
@@ -60,15 +59,28 @@ void setup() {
   while (!Serial) delay(10);
 }
 
+struct RGB {
+    uint8_t r;
+    uint8_t g;
+    uint8_t b;
+
+    RGB(uint32_t color) {
+        r = (color & (0xfful << 16)) >> 16;
+        g = (color & (0xfful << 8)) >> 8;
+        b = color & 0xfful;
+    }
+};
+
+
 void serialEvent() {
-  auto err = deserializeJson(json_cmd, Serial);
+  auto err = deserializeJson(json, Serial);
   if (err != DeserializationError::Ok) {
     Serial.print("Error decoding json: ");
     Serial.println(err.c_str());
     return;
   }
 
-  JsonObject obj = json_cmd.as<JsonObject>();
+  JsonObject obj = json.as<JsonObject>();
   if (!obj) {
     Serial.println("Json command must be an object");
     return;
@@ -81,10 +93,11 @@ void serialEvent() {
 
   String cmd = obj["cmd"];
 
-
   if (cmd == "on") {
+    on = true;
     set_color();
   } else if (cmd == "off") {
+    on = false;
     all_off();
   } else if (cmd == "set") {
     if (!obj["pix"].is<int>()) {
@@ -109,7 +122,18 @@ void serialEvent() {
     colors[pix] = pixels.Color(r, g, b);
     pixels.setPixelColor(pix, colors[pix]);
     pixels.show();
-
+  } else if (cmd == "get") {
+    json.clear();
+    json["on"] = on;
+    for (int pix=0; pix < N_PIXELS; pix++) {
+        RGB rgb(colors[pix]);
+        json["colors"][pix][0] = rgb.r;
+        json["colors"][pix][1] = rgb.g;
+        json["colors"][pix][2] = rgb.b;
+    }
+    serializeJson(json, Serial);
+    Serial.println();
+    return;
   } else {
     Serial.print("Unknown command: ");
     Serial.println(cmd);
