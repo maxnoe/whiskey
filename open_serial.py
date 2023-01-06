@@ -2,7 +2,7 @@ from serial import Serial
 import time
 import struct
 
-dev = Serial('/dev/ttyACM1', 115200, timeout=0.25)
+dev = Serial('/dev/ttyACM0', 115200, timeout=0.25)
 
 
 def print_messages():
@@ -28,8 +28,8 @@ def set_pix(pix, r, g, b):
 
 
 def set_all(colors):
-    msg = bytearray(b'\x03')
+    msg = bytearray(b'\x04')
     for color in colors:
-        msg += struct.pack('<BBB', color)
+        msg += struct.pack('<BBB', *color)
     dev.write(msg)
     print_messages()

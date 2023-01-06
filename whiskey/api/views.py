@@ -39,9 +39,9 @@ def set_pix(pix, r, g, b):
 
 
 def set_all(colors):
-    msg = bytearray(b'\x03')
+    msg = bytearray(b'\x04')
     for color in colors:
-        msg += struct.pack('<BBB', color)
+        msg += struct.pack('<BBB', *color)
     PIXELS.write(msg)
     return get_response()
 
