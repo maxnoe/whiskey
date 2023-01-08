@@ -1,5 +1,16 @@
 <script>
+
 import { onMount } from 'svelte';
+import { hsv2rgb, rgb2hex, hex2rgb } from './colors.js';
+
+
+let color = "#400000";
+let color_all = "#400000";
+let pixel = 0;
+let on = false;
+let hue = 0.0;
+let value = 0.5;
+
 
 async function sendCommand(cmd) {
     console.log(cmd);
@@ -19,30 +30,13 @@ function toggle(event) {
     sendCommand(cmd).then(data => console.log(data));
 }
 
-let color = "#400000";
-let pixel = 0;
-let on = false;
-
-function to_hex(integer) {
-    var str = Number(integer).toString(16);
-    return str.length == 1 ? "0" + str : str;
-};
-
-function rgb2hex(r, g, b) {
-    return "#" + to_hex(r) + to_hex(g) + to_hex(b);
-}
-
-function hex2rgb(hex) {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-    console.log(color)
-    console.log([r, g, b]);
-    return [r, g, b];
-}
-
 function setColor(event) {
     const cmd = {"cmd": "set_pix", "pix": pixel, "color": hex2rgb(color)};
+    sendCommand(cmd).then(data => console.log(data));
+}
+
+function setAll(event) {
+    const cmd = {"cmd": "set_all", "color": hex2rgb(color_all)};
     sendCommand(cmd).then(data => console.log(data));
 }
 
@@ -83,6 +77,36 @@ onMount(async () => {
 
     <button type="button" on:click={sine} class="btn btn-primary">Sine-Wave</button>
 
+    <div id="test" style="display: block; height: 20px; width: 20px; background-color: black; border: solid 1px black;">
+    </div>
+
+
+    <form on:submit|preventDefault={setAll} class="form form-inline">
+      <div class="row">
+        <label class="col-auto col-form-label" for="color">Hue</label>
+        <div class="col col-2">
+          <input class="form-control" style="background-color: {rgb2hex(hsv2rgb(hue, 1.0, 1.0))};" bind:value={hue} type="range" on:change={console.log(hue)} id="hue" min="0.0" max="1.0" step="{1/255}">
+        </div>
+
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary">Set All Pixels</button>
+        </div>
+      </div>
+    </form>
+
+    <form on:submit|preventDefault={setAll} class="form form-inline">
+      <div class="row">
+        <label class="col-auto col-form-label" for="color">Color</label>
+        <div class="col col-2">
+          <input class="form-control" bind:value={color_all} type="color" id="color">
+        </div>
+
+        <div class="col-auto">
+          <button type="submit" class="btn btn-primary">Set All Pixels</button>
+        </div>
+      </div>
+    </form>
+
     <form on:submit|preventDefault={setColor} class="form form-inline">
       <div class="row">
         <label class="col-auto col-form-label" for="pixel">Pixel</label>
@@ -99,7 +123,6 @@ onMount(async () => {
           <button type="submit" class="btn btn-primary">Set Pixel Color</button>
         </div>
       </div>
-
     </form>
 
 </main>
