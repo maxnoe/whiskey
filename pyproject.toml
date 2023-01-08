@@ -7,16 +7,18 @@ license = "mit"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.9"
 Django = "^4.1.4"
 whitenoise = "^6.2.0"
 djangorestframework = "^3.14.0"
-pyserial = "^3.5"
+rpi-gpio = "^0.7.1"
+adafruit-circuitpython-neopixel = "^6.3.7"
+rpi-ws281x = "^4.3.4"
+redis = "^4.4.1"
 
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.7.0"
-msgpack = "^1.0.4"
 
 [build-system]
 requires = ["poetry-core"]
