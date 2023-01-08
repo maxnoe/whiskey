@@ -32,12 +32,13 @@ SECRET_KEY = os.getenv("WHISKEY_SECRET", "django-insecure-4x5z^3tlml!wymrt%e$&li
 
 DEBUG = envbool("WHISKEY_DEBUG", False)
 
-DEVICE = os.getenv("WHISKEY_DEVICE", "/dev/ttyACM0")
+REDIS_URL = os.getenv("WHISKEY_REDIS_URL", "redis://localhost:6379")
 
 
 ALLOWED_HOSTS = [
     "maxnoe-x1.local",
     "localhost",
+    "pi4.local",
 ]
 
 

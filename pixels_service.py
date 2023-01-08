@@ -34,15 +34,20 @@ class Pixels(Thread):
             brightness=1.0,
         )
         all_off(self.pixels)
+
+        self.colors = [OFF] * self.n_pixels
+        self.on = False
         self.current_cmd = None
         self.interval = interval
 
+
     def run(self):
         while not self.stop_event.is_set():
-            if self.current_cmd is not None:
-                self.current_cmd(self.pixels)
-            
-            self.pixels.show()
+            if self.on:
+                if self.current_cmd is not None:
+                    self.current_cmd(self.pixels)
+
+                self.pixels.show()
             self.stop_event.wait(self.interval)
 
     def terminate(self):
@@ -60,7 +65,7 @@ def hsv2rgb(h, s, v):
     h = h / (1/6)
     c = s * v
     x = c * (1 - abs(h % 2 - 1))
-    
+
     c = int(255 * c)
     x = int(255 * x)
 
@@ -85,12 +90,16 @@ def all_off(pixels):
     pixels.show()
 
 
+def set_colors(pixels, colors):
+    for pix, color in enumerate(colors):
+        pixels[pix] = color
+
+
 def sine_wave(pixels, period, basecolor=(0xff, 0xff, 0xff)):
     t = time.time()
     intensity = 0.5 * (1 + math.sin(2 * math.pi * t / period))
     color = tuple(int(intensity * c) for c in basecolor)
     pixels.fill(color)
-
 
 def rainbow(pixels, period):
     t = time.time()
@@ -111,13 +120,22 @@ def clock(pixels, period):
 def handle_cmd(command, pixels):
     cmd = command.get("cmd")
 
+    pixel_colors = pixels.colors
+
     if cmd == "off":
+        pixels.on = False
         all_off(pixels.pixels)
-        pixels.current_cmd = None
+
+    elif cmd == "on":
+        pixels.on = True
 
     elif cmd == "rainbow":
         period = command.get("period", 1.0)
         pixels.current_cmd = partial(rainbow, period=period)
+
+    elif cmd == "clock":
+        period = command.get("period", 1.0)
+        pixels.current_cmd = partial(clock, period=period)
 
     elif cmd == "sine":
         period = command.get("period", 1.0)
@@ -128,45 +146,59 @@ def handle_cmd(command, pixels):
         pixels.current_cmd = None
 
     elif cmd == 'set_pix':
-        pixels.current_cmd = None
         pix = command['pix']
         color = command['color']
-        pixels.pixels[pix] = color
+        pixel_colors[pix] = color
+        pixels.current_cmd = partial(set_colors, colors=pixel_colors)
 
     elif cmd == 'set_all':
-        pixels.current_cmd = None
         color = command['color']
-        pixels.pixels.fill(color)
+        for pix in range(pixels.n_pixels):
+            pixel_colors[pix] = color
+        pixels.current_cmd = partial(set_colors, colors=pixel_colors)
 
     elif cmd == 'set':
-        pixels.current_cmd = None
         colors = command['colors']
         for pix, color in enumerate(colors):
-            pixels.pixels[pix] = color
+            pixel_colors[pix] = color
+        pixels.current_cmd = partial(set_colors, colors=pixel_colors)
+
+    elif cmd == 'get':
+        return {"status": "ok", "on": pixels.on}
 
     else:
-        print("Unknown command:", cmd)
+        return {"status": "error", "msg": f"Unknown command: {cmd}"}
+
+    return {"status": "ok"}
 
 
 
 def main():
     r = redis.StrictRedis()
+    r.delete("commands")
+    r.delete("response")
 
     with Pixels(n_jewells=2) as pixels:
         pixels.current_cmd = partial(clock, period=1.0)
         pixels.start()
 
         try:
+            print(f"Ready to accept commands on: {r}")
             while True:
                 response = r.blpop("commands")
                 if response:
                     _, data = response
                     try:
                         command = json.loads(data.decode('utf-8'))
-                        handle_cmd(command, pixels)
+                        print('Got:', command)
+                        result = handle_cmd(command, pixels)
+                        print('Resp: ', result)
+                        r.rpush("response", json.dumps(result))
                     except Exception as err:
+                        r.rpush("response", json.dumps({"status": "error", "msg": str(err)}))
                         print(f"Error handling cmd: {err}")
         except KeyboardInterrupt:
+            print("Interrupted")
             pass
 
 

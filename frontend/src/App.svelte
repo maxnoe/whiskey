@@ -2,6 +2,7 @@
 import { onMount } from 'svelte';
 
 async function sendCommand(cmd) {
+    console.log(cmd);
     const response = await fetch("/api/pixels", {
         method: 'POST',
         headers: {
@@ -45,6 +46,21 @@ function setColor(event) {
     sendCommand(cmd).then(data => console.log(data));
 }
 
+function rainbow(event) {
+    const cmd = {"cmd": "rainbow"}
+    sendCommand(cmd).then(data => console.log(data));
+}
+
+function clock(event) {
+    const cmd = {"cmd": "clock"}
+    sendCommand(cmd).then(data => console.log(data));
+}
+
+function sine(event) {
+    const cmd = {"cmd": "sine"}
+    sendCommand(cmd).then(data => console.log(data));
+}
+
 onMount(async () => {
     const data = await sendCommand({"cmd": "get"});
     on =  data["on"];
@@ -55,10 +71,17 @@ onMount(async () => {
 <main>
 	<h1>Pixels</h1>
 
+
     <div class="form-check form-switch mb-3">
       <input class="form-check-input" bind:checked={on} on:change={toggle} type="checkbox" id="power">
       <label class="form-check-label" for="power">Pixels on/off</label>
     </div>
+
+    <button type="button" on:click={rainbow} class="btn btn-primary">Rainbow</button>
+
+    <button type="button" on:click={clock} class="btn btn-primary">Clock</button>
+
+    <button type="button" on:click={sine} class="btn btn-primary">Sine-Wave</button>
 
     <form on:submit|preventDefault={setColor} class="form form-inline">
       <div class="row">
@@ -73,7 +96,7 @@ onMount(async () => {
         </div>
 
         <div class="col-auto">
-          <button type="submit" class="btn btn-primary">Submit</button>
+          <button type="submit" class="btn btn-primary">Set Pixel Color</button>
         </div>
       </div>
 
@@ -82,5 +105,9 @@ onMount(async () => {
 </main>
 
 <style>
+
+main {
+  max-width: 80rem;
+}
 
 </style>
