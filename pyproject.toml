@@ -15,6 +15,7 @@ rpi-gpio = "^0.7.1"
 adafruit-circuitpython-neopixel = "^6.3.7"
 rpi-ws281x = "^4.3.4"
 redis = "^4.4.1"
+django-channels = "^0.7.0"
 
 
 [tool.poetry.group.dev.dependencies]

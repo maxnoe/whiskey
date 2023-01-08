@@ -45,15 +45,16 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
+    "rest_framework",
+    "whiskey.app",
+    "whiskey.api",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "rest_framework",
-    "whiskey.app",
-    "whiskey.api",
 ]
 
 MIDDLEWARE = [
@@ -88,6 +89,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "whiskey.wsgi.application"
+ASGI_APPLICATION = "whiskey.asgi.application"
 
 
 # Database
