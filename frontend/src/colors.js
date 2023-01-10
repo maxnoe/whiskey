@@ -13,33 +13,32 @@ export function rgb2hex(r, g, b) {
 }
 
 export function hsv2rgb(h, s, v) {
-    if (arguments.length == 1) {
-        s = h[1];
-        v = h[2];
-        h = h[0];
-    }
+  if (arguments.length == 1) {
+      s = h[1];
+      v = h[2];
+      h = h[0];
+  }
 
-    h = h / (1/6);
-    let c = s * v;
-    let x = c * (1 - Math.abs(h % 2 - 1));
 
-    c = Math.floor(255 * c)
-    x = Math.floor(255 * x)
+  h = h / (1/6);
+  let c = s * v;
+  let x = c * (1 - Math.abs(h % 2 - 1));
+  let m = v - c;
 
-    let r = 0;
-    let g = 0;
-    let b = 0;
+  let r = 0;
+  let g = 0;
+  let b = 0;
 
-    switch (Math.floor(h) % 6) {
-        case 0: r = c; g = x; break;
-        case 1: r = x; g = c; break;
-        case 2: g = c; b = x; break;
-        case 3: g = x; b = c; break;
-        case 4: r = x; b = c; break;
-        case 5: r = c; b = x; break;
-    }
+  switch (Math.floor(h) % 6) {
+      case 0: r = c; g = x; break;
+      case 1: r = x; g = c; break;
+      case 2: g = c; b = x; break;
+      case 3: g = x; b = c; break;
+      case 4: r = x; b = c; break;
+      case 5: r = c; b = x; break;
+  }
 
-    return [r, g, b]
+  return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)]
 }
 
 export function hex2rgb(hex) {
