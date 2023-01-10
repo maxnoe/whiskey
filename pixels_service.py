@@ -2,15 +2,20 @@
 Long running process running as root receiving commands from a redis queue
 """
 import redis
-import board
-import neopixel
 import time
 import math
 from threading import Thread, Event
 import json
 from functools import partial
 
-PIN = board.D21
+try:
+    import board
+    import neopixel
+except (ImportError, NotImplementedError):
+    # not on a pi
+    pass
+
+
 
 OFF = (0, 0, 0)
 RED = (0xff, 0, 0)
@@ -21,7 +26,7 @@ N_PIX_JEWELL = 7
 
 
 class Pixels(Thread):
-    def __init__(self, n_jewells, interval=0.001):
+    def __init__(self, pin, n_jewells, interval=0.001):
         super().__init__()
 
         self.stop_event = Event()
@@ -66,23 +71,21 @@ def hsv2rgb(h, s, v):
     c = s * v
     x = c * (1 - abs(h % 2 - 1))
 
-    c = int(255 * c)
-    x = int(255 * x)
-
     if h < 1:
-        rgb = (c, x, 0)
+        r, g, b = (c, x, 0)
     elif h < 2:
-        rgb = (x, c, 0)
+        r, g, b = (x, c, 0)
     elif h < 3:
-        rgb = (0, c, x)
+        r, g, b = (0, c, x)
     elif h < 4:
-        rgb = (0, x, c)
+        r, g, b = (0, x, c)
     elif h < 5:
-        rgb = (x, 0, c)
+        r, g, b = (x, 0, c)
     else:
-        rgb = (c, 0, x)
+        r, g, b = (c, 0, x)
 
-    return rgb
+    m = v - c
+    return (int(255 * (r + m)), int(255 * (g + m)), int(255 * (b + m)))
 
 
 def all_off(pixels):
@@ -178,7 +181,7 @@ def main():
     r.delete("commands")
     r.delete("response")
 
-    with Pixels(n_jewells=2) as pixels:
+    with Pixels(board.D21, n_jewells=2) as pixels:
         pixels.current_cmd = partial(clock, period=1.0)
         pixels.start()
 
