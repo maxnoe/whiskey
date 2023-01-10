@@ -1,10 +1,13 @@
 <script>
 import { onMount } from 'svelte';
 import { hsv2rgb } from './colors.js';
+import { createEventDispatcher } from 'svelte';
 
+const dispatch = createEventDispatcher();
 export let hue;
 export let saturation;
 export let value = 1.0;
+export let open = false;
 
 let dragging = false;
 
@@ -31,6 +34,7 @@ function setColor(event) {
     let [h, s] = xy2hs(x, y);
     hue = h;
     saturation = Math.min(s, 1.0);
+    dispatch("change", {hue: hue, saturation: saturation, value: value});
     update();
 }
 
@@ -88,19 +92,58 @@ function update() {
 }
 </script>
 
-<canvas
-    width="300" height="300"
-    class="popup"
-    on:mousemove={setColor}
-    on:click={setColor}
-    on:mousedown={(event) => {dragging = true; setColor(event)}}
-    on:mouseup={() => {dragging = false;}}
-    bind:this={canvas}
-></canvas>
+<div class="background" style="--display: {open ? 'block' : 'none'};"></div>
+<div class="modal" style="--display: {open ? 'block' : 'none'};">
+    <div class="wrapper">
+        <canvas
+            width="300" height="300"
+            class="popup"
+            on:mousemove={setColor}
+            on:click={setColor}
+            on:mousedown={(event) => {dragging = true; setColor(event)}}
+            on:mouseup={() => {dragging = false;}}
+            on:mouseleave={() => {dragging = false;}}
+            bind:this={canvas}
+        ></canvas>
+        <button class="btn btn-primary" on:click={() => {open=false}}>Close</button>
+    </div>
+</div>
+
 
 <style>
+.wrapper {
+    display: flex;
+    flex-direction: column;
+}
+
+.background {
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: var(--display);
+    background: rgba(0, 0, 0, 0.3);
+}
+button {
+    margin: 0.5rem;
+}
 canvas {
-    border: 3px solid darkgray;
-    border-radius: 5px;
+    display: block;
+    margin: 0.5rem;
+}
+
+.modal {
+    position: fixed;
+    z-index: 2;
+    width: min-content;
+    height: min-content;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    filter: drop-shadow(0 0 20px #333);
+    display: var(--display);
 }
 </style>

@@ -61,6 +61,8 @@ onMount(async () => {
     on =  data["on"];
 })
 
+let colors = Array(7).fill("#ff0000");
+
 </script>
 
 <main>
@@ -78,7 +80,9 @@ onMount(async () => {
 
     <button type="button" on:click={sine} class="btn btn-primary">Sine-Wave</button>
 
-    <ColorPicker />
+    {#each colors as color, i}
+        <ColorPicker bind:color={colors[i]} />
+    {/each}
 
 </main>
 
