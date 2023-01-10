@@ -11,9 +11,19 @@ from ..settings import REDIS_URL
 
 def send_command(cmd):
     data = json.dumps(cmd).encode('ascii')
-    redis_client.lpush("commands", data)
-    _, answer = redis_client.blpop("response")
+
+    try:
+        redis_client.lpush("commands", data)
+        _, answer = redis_client.blpop("response")
+    except redis.TimeoutError:
+        return {
+            "status": "error",
+            "status_code": 503,
+            "msg": "Error connecting to redis"
+        }
+
     answer = json.loads(answer.decode("ascii"))
+    answer["status_code"] = 200 if answer["status"] == "ok" else 422
     return answer
 
 
@@ -31,7 +41,8 @@ class PixelsAPI(APIView):
 
     def post(self, request, format=None):
         answer = send_command(request.data)
-        return Response(answer, status=200 if answer.get("status") == "ok" else 422)
+        return Response(answer, status=answer["status_code"])
 
     def get(self, request, format=None):
-        return Response(send_command({"cmd": "get"}))
+        answer = send_command({"cmd": "get"})
+        return Response(answer, status=answer["status_code"])
