@@ -4,6 +4,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
+
 import redis
 
 from ..settings import REDIS_URL
@@ -38,11 +41,17 @@ redis_client.delete("response")
 
 class PixelsAPI(APIView):
     renderer_classes = [JSONRenderer]
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def post(self, request, format=None):
+        cmd = request.data
         answer = send_command(request.data)
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)("whiskey", {"type": "update"})
         return Response(answer, status=answer["status_code"])
 
     def get(self, request, format=None):
         answer = send_command({"cmd": "get"})
-        return Response(answer, status=answer["status_code"])
+        return Response(answer)

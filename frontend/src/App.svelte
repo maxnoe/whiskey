@@ -1,8 +1,26 @@
 <script>
 
 import { onMount } from 'svelte';
-import { hsv2rgb, rgb2hex, hex2rgb } from './colors.js';
+import { hex2rgb } from './colors.js';
 import ColorPicker from './ColorPicker.svelte';
+
+
+let socket = new WebSocket(
+    `ws://${window.location.host}/ws`
+);
+
+socket.onmessage = function(e) {
+    console.log("Received message", e);
+    if (e.data == "update") {
+        getState()
+    }
+}
+socket.onconnect = function(e) {
+    console.log("Socket connected")
+}
+socket.onclose = function(e) {
+    console.log("Socket closed")
+}
 
 
 let color = "#400000";
@@ -56,9 +74,15 @@ function sine(event) {
     sendCommand(cmd).then(data => console.log(data));
 }
 
-onMount(async () => {
-    const data = await sendCommand({"cmd": "get"});
+async function getState() {
+    const response = await fetch("/api/pixels");
+    const data = await response.json()
+    console.log(data);
     on =  data["on"];
+}
+
+onMount(async () => {
+    await getState()
 })
 
 let colors = Array(7).fill("#ff0000");

@@ -39,6 +39,7 @@ ALLOWED_HOSTS = [
     "maxnoe-x1.local",
     "localhost",
     "pi4.local",
+    "127.0.0.1",
 ]
 
 
@@ -90,6 +91,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "whiskey.wsgi.application"
 ASGI_APPLICATION = "whiskey.asgi.application"
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
+
 
 
 # Database
