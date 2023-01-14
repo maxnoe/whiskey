@@ -33,7 +33,7 @@ class Pixels(Thread):
 
         self.n_pixels = N_PIX_JEWELL * n_jewells
         self.pixels = neopixel.NeoPixel(
-            PIN,
+            pin,
             self.n_pixels,
             auto_write=False,
             brightness=1.0,
