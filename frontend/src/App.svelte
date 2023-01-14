@@ -117,15 +117,8 @@ onMount(async () => {
 
     <button type="button" on:click={setColors} class="btn btn-primary">Set All</button>
 
-    {#each Array(7) as color, i}
-        <div class="row">
-            <div class="col col-12 col-md-6">
-                <ColorPicker bind:color={colors[2 * i]} />
-            </div>
-            <div class="col col-12 col-md-6">
-                <ColorPicker bind:color={colors[2 * i + 1]} />
-            </div>
-        </div>
+    {#each colors as color, i}
+        <ColorPicker bind:color={colors[i]} />
     {/each}
 
 </main>

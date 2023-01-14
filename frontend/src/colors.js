@@ -47,6 +47,9 @@ export function rgb2hsv(r, g, b) {
       b = r[2];
       r = r[0];
   }
+  if (r == 0 && g == 0 && b == 0) {
+    return [0, 1, 0];
+  }
   let x_max = Math.max(r, g, b);
   let x_min = Math.min(r, g, b);
   let c = x_max - x_min;
