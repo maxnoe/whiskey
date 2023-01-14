@@ -17,12 +17,12 @@ let colors;
 let img_data;
 
 
-onMount(() => {
+$: if (open == true) {
     ctx = canvas.getContext("2d");
     colors = ctx.createImageData(canvas.width, canvas.height);
     img_data = colors.data;
     update();
-});
+}
 
 
 function setColor(event) {
@@ -90,6 +90,11 @@ function update() {
         ctx.stroke();
     })
 }
+
+function toggle() {
+    open = !open;
+}
+
 </script>
 
 <div class="background" style="--display: {open ? 'block' : 'none'};"></div>
@@ -105,7 +110,7 @@ function update() {
             on:mouseleave={() => {dragging = false;}}
             bind:this={canvas}
         ></canvas>
-        <button class="btn btn-primary" on:click={() => {open=false}}>Close</button>
+        <button class="btn btn-primary" on:click={toggle}>Close</button>
     </div>
 </div>
 

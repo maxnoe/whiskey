@@ -1,12 +1,20 @@
 <script>
 import { cssVariables } from './styles.js';
-import { hsv2rgb, rgb2hex } from './colors.js';
+import { hsv2rgb, rgb2hex, hex2rgb, rgb2hsv } from './colors.js';
 import HueSaturationPicker from './HueSaturationPicker.svelte';
 import { createEventDispatcher } from 'svelte';
 
 const dispatch = createEventDispatcher();
 
 export let color = rgb2hex(hsv2rgb(hue, saturation, value));
+
+$: if (color !== undefined) {
+    let [r, g, b] = hex2rgb(color);
+    let [h, s, v] = rgb2hsv(r / 255, g / 255, b / 255);
+    value255 = Math.round(v * 255);
+    hue = h;
+    saturation = s;
+}
 
 let value255 = 64;
 $: value = value255 / 255;

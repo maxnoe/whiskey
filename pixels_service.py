@@ -167,7 +167,7 @@ def handle_cmd(command, pixels):
         pixels.current_cmd = partial(set_colors, colors=pixel_colors)
 
     elif cmd == 'get':
-        return {"status": "ok", "on": pixels.on}
+        return {"status": "ok", "on": pixels.on, "colors": pixel_colors}
 
     else:
         return {"status": "error", "msg": f"Unknown command: {cmd}"}

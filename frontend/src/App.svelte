@@ -1,7 +1,7 @@
 <script>
 
 import { onMount } from 'svelte';
-import { hex2rgb } from './colors.js';
+import { hex2rgb, hsv2rgb, rgb2hsv, rgb2hex } from './colors.js';
 import ColorPicker from './ColorPicker.svelte';
 
 
@@ -29,6 +29,7 @@ let pixel = 0;
 let on = false;
 let hue = 0.0;
 let value = 0.5;
+let colors = Array(14).fill("#200000");
 
 
 async function sendCommand(cmd) {
@@ -75,7 +76,10 @@ function sine(event) {
 }
 
 function setColors(event) {
-    const cmd = {"cmd": "set", colors: colors};
+    console.log(colors);
+    let rgb_colors = colors.map(hex2rgb);
+    console.log(rgb_colors);
+    const cmd = {"cmd": "set", colors: rgb_colors};
     sendCommand(cmd).then(data => console.log(data));
 }
 
@@ -84,13 +88,15 @@ async function getState() {
     const data = await response.json()
     console.log(data);
     on =  data["on"];
+    data["colors"].forEach((color, i) => {
+        colors[i] = rgb2hex(color);
+    });
 }
 
 onMount(async () => {
-    await getState()
+    await getState();
 })
 
-let colors = Array(14).fill("#ff0000");
 
 </script>
 
@@ -109,18 +115,18 @@ let colors = Array(14).fill("#ff0000");
 
     <button type="button" on:click={sine} class="btn btn-primary">Sine-Wave</button>
 
+    <button type="button" on:click={setColors} class="btn btn-primary">Set All</button>
+
     {#each Array(7) as color, i}
         <div class="row">
-            <div class="col col-6">
-                <ColorPicker bind:color={colors[i]} />
+            <div class="col col-12 col-md-6">
+                <ColorPicker bind:color={colors[2 * i]} />
             </div>
-            <div class="col col-6">
-                <ColorPicker bind:color={colors[i]} />
+            <div class="col col-12 col-md-6">
+                <ColorPicker bind:color={colors[2 * i + 1]} />
             </div>
         </div>
     {/each}
-
-    <button type="button" on:click={setColors} class="btn btn-primary">Set All</button>
 
 </main>
 

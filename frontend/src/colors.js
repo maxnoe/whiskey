@@ -19,7 +19,6 @@ export function hsv2rgb(h, s, v) {
       h = h[0];
   }
 
-
   h = h / (1/6);
   let c = s * v;
   let x = c * (1 - Math.abs(h % 2 - 1));
@@ -39,6 +38,33 @@ export function hsv2rgb(h, s, v) {
   }
 
   return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)]
+}
+
+
+export function rgb2hsv(r, g, b) {
+  if (arguments.length == 1) {
+      g = r[1];
+      b = r[2];
+      r = r[0];
+  }
+  let x_max = Math.max(r, g, b);
+  let x_min = Math.min(r, g, b);
+  let c = x_max - x_min;
+  let v = 0.5 * (c + (x_max + x_min));
+  let h = 0;
+  if (v == r) {
+    h = (1/6) * (0 + (g - b) / c);
+  } else if (v == g) {
+    h = (1/6) * (2 + (b - r) / c);
+  } else if (v == b) {
+    h = (1/6) * (4 + (r - g) / c)
+  }
+
+  let s = 0;
+  if (v != 0) {
+    s = c / v;
+  }
+  return [h, s, v];
 }
 
 export function hex2rgb(hex) {
