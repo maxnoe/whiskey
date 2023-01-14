@@ -74,6 +74,11 @@ function sine(event) {
     sendCommand(cmd).then(data => console.log(data));
 }
 
+function setColors(event) {
+    const cmd = {"cmd": "set", colors: colors};
+    sendCommand(cmd).then(data => console.log(data));
+}
+
 async function getState() {
     const response = await fetch("/api/pixels");
     const data = await response.json()
@@ -85,7 +90,7 @@ onMount(async () => {
     await getState()
 })
 
-let colors = Array(7).fill("#ff0000");
+let colors = Array(14).fill("#ff0000");
 
 </script>
 
@@ -104,9 +109,18 @@ let colors = Array(7).fill("#ff0000");
 
     <button type="button" on:click={sine} class="btn btn-primary">Sine-Wave</button>
 
-    {#each colors as color, i}
-        <ColorPicker bind:color={colors[i]} />
+    {#each Array(7) as color, i}
+        <div class="row">
+            <div class="col col-6">
+                <ColorPicker bind:color={colors[i]} />
+            </div>
+            <div class="col col-6">
+                <ColorPicker bind:color={colors[i]} />
+            </div>
+        </div>
     {/each}
+
+    <button type="button" on:click={setColors} class="btn btn-primary">Set All</button>
 
 </main>
 
