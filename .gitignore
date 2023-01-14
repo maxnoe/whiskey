@@ -1,6 +1,8 @@
 *.sqlite
 *.sqlite3
 whiskey/static/frontend/bundle.*
+whiskey/staticfiles
+whiskey/static/frontend/bootstrap.*
 node_modules
 # Byte-compiled / optimized / DLL files
 __pycache__/
